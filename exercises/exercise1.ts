@@ -23,17 +23,26 @@ import { logError } from "./logger.js"
 // so every price in the system is guaranteed valid by construction.
 // ============================================================================
 
+type Price = number & { readonly __brand: unique symbol};
+
+function createPrice(amount: number): Price {
+  if (amount < 0) throw new Error("Price can't be negative");
+  if (amount > 10_000) throw new Error("Price exceeds maximum");
+
+  return amount as Price;
+}
+
 export function exercise1_PrimitivePrice() {
 	// Without domain types, price is just a number
 	type MenuItem = {
 		name: string
-		price: number // Could be negative! Could be a huge number!
+		price: Price // Could be negative! Could be a huge number!
 		quantity: number
 	}
 
 	const orderItem: MenuItem = {
 		name: "Burger",
-		price: -50, // Silent bug! Negative price
+		price: createPrice(50), // Silent bug! Negative price
 		quantity: 1,
 	}
 
