@@ -5,36 +5,51 @@ function createEmail(s) {
     return s;
 }
 function createPhone(s) {
-    if (!/^\d[d\-]{6,}$/.test(s))
-        throw new Error("Invalid phone number");
+    if (!/^\d[\d\-]{6,}$/.test(s))
+        throw new Error("Invalid phone");
     return s;
 }
 function createCustomerName(s) {
     if (s.trim().length === 0)
-        throw new Error("Name can't be empty");
-    return s;
+        throw new Error("Name cannot be empty");
+    return s.trim();
 }
 export function exercise3_StringConfusion() {
     // TypeScript sees all strings as the same!
-    const customer = {
-        name: createCustomerName("John Doe"), // Silent bug! Email in name field
-        email: createEmail("john@example.com"), // Silent bug! Name in email field
-        phone: createPhone("555-PIZZA"), // Silent bug! Letters in phone field
-    };
+    try {
+        const customer = {
+            name: createCustomerName("John Doe"),
+            email: createEmail("john@example.com"),
+            phone: createPhone("555-0000"),
+        };
+        logError(3, "Valid customer created with branded types", {
+            customer,
+            issue: "Now email, phone, and name have semantic distinction!",
+        });
+    }
+    catch (error) {
+        logError(3, "Error creating valid customer", {
+            error: error instanceof Error ? error.message : String(error),
+        });
+    }
     // TODO: Create separate branded types (Email, Phone, CustomerName) so
     // that swapping values between fields becomes a compile-time error.
-    logError(3, "Fields mixed up - all are strings, TypeScript doesn't care", {
-        customer,
-        issue: "Email, phone, and name are all 'string' - no semantic distinction!",
-    });
     // Even worse - empty strings pass validation
-    const emptyCustomer = {
-        name: createCustomerName(""),
-        email: createEmail(""),
-        phone: createPhone(""),
-    };
-    logError(3, "Empty strings accepted everywhere", {
-        customer: emptyCustomer,
-        issue: "Required fields should not be empty!",
-    });
+    try {
+        const emptyCustomer = {
+            name: createCustomerName(""),
+            email: createEmail(""),
+            phone: createPhone(""),
+        };
+        logError(3, "Empty strings accepted everywhere", {
+            customer: emptyCustomer,
+            issue: "Required fields should not be empty!",
+        });
+    }
+    catch (error) {
+        logError(3, "Empty strings rejected by validation", {
+            error: error instanceof Error ? error.message : String(error),
+            issue: "Validation prevents empty required fields!",
+        });
+    }
 }

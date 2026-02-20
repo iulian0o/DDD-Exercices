@@ -35,26 +35,23 @@ import { logError } from "./logger.js";
 // This is the core DDD idea: make illegal states unrepresentable.
 // ============================================================================
 
-type Email = string & { readonly __brand: unique symbol };
-type Phone = string & { readonly __brand: unique symbol };
-type CustomerName = string & { readonly __brand: unique symbol };
+type Email = string & { readonly __brand: unique symbol }
+type Phone = string & { readonly __brand: unique symbol }
+type CustomerName = string & { readonly __brand: unique symbol }
 
 function createEmail(s: string): Email {
-  if (!/^[^@]+@[^@]+\.[^@]+$/.test(s)) throw new Error("Invalid email");
-
-  return s as Email;
+    if (!/^[^@]+@[^@]+\.[^@]+$/.test(s)) throw new Error("Invalid email")
+    return s as Email
 }
 
 function createPhone(s: string): Phone {
-  if (!/^\d[d\-]{6,}$/.test(s)) throw new Error("Invalid phone number");
-
-  return s as Phone;
+    if (!/^\d[\d\-]{6,}$/.test(s)) throw new Error("Invalid phone")
+    return s as Phone
 }
 
 function createCustomerName(s: string): CustomerName {
-  if (s.trim().length === 0) throw new Error("Name can't be empty");
-
-  return s as CustomerName;
+    if (s.trim().length === 0) throw new Error("Name cannot be empty")
+    return s.trim() as CustomerName
 }
 
 export function exercise3_StringConfusion() {
@@ -65,29 +62,42 @@ export function exercise3_StringConfusion() {
   };
 
   // TypeScript sees all strings as the same!
-  const customer: Customer = {
-    name: createCustomerName("John Doe"), // Silent bug! Email in name field
-    email: createEmail("john@example.com"), // Silent bug! Name in email field
-    phone: createPhone("555-PIZZA"), // Silent bug! Letters in phone field
-  };
+  try {
+    const customer: Customer = {
+      name: createCustomerName("John Doe"),
+      email: createEmail("john@example.com"),
+      phone: createPhone("555-0000"),
+    };
+
+    logError(3, "Valid customer created with branded types", {
+      customer,
+      issue: "Now email, phone, and name have semantic distinction!",
+    });
+  } catch (error) {
+    logError(3, "Error creating valid customer", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   // TODO: Create separate branded types (Email, Phone, CustomerName) so
   // that swapping values between fields becomes a compile-time error.
 
-  logError(3, "Fields mixed up - all are strings, TypeScript doesn't care", {
-    customer,
-    issue: "Email, phone, and name are all 'string' - no semantic distinction!",
-  });
-
   // Even worse - empty strings pass validation
-  const emptyCustomer: Customer = {
-    name: createCustomerName(""),
-    email: createEmail(""),
-    phone: createPhone(""),
-  };
+  try {
+    const emptyCustomer: Customer = {
+      name: createCustomerName(""),
+      email: createEmail(""),
+      phone: createPhone(""),
+    };
 
-  logError(3, "Empty strings accepted everywhere", {
-    customer: emptyCustomer,
-    issue: "Required fields should not be empty!",
-  });
+    logError(3, "Empty strings accepted everywhere", {
+      customer: emptyCustomer,
+      issue: "Required fields should not be empty!",
+    });
+  } catch (error) {
+    logError(3, "Empty strings rejected by validation", {
+      error: error instanceof Error ? error.message : String(error),
+      issue: "Validation prevents empty required fields!",
+    });
+  }
 }
