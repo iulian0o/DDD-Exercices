@@ -1,17 +1,26 @@
 /*  USER REGISTRATION   */
 
+/*  USER REGISTRATION   */
+
+type Brand<K, T> = K & {readonly __brand: T};
+
+type Name = Brand<string, "Name">;
+type Email = Brand<string, "Email">;
+type Phone = Brand<string, "Phone">;
+type Password = Brand<string, "Password">;
+
 type User = {
-	name: any
-	email: string
-	phone: string
-	password: string
-}
+	name: Name,
+	email: Email,
+	phone: Phone,
+	password: Password,
+};
 
 const createUser = (
-	name: any,
-	email: string,
-	phone: string,
-	password: string,
+	name: Name,
+	email: Email,
+	phone: Phone,
+	password: Password,
 ): User => {
 	return {
 		name,
@@ -19,18 +28,145 @@ const createUser = (
 		phone,
 		password,
 	}
+};
+
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
 }
-// CAREFUL ! This function is very flexible but also very error-prone. It accepts any strings !
 
-/*  manual tests   */
-const newUser = createUser(
-	true,
-	"alice@example.com",
-	"secret123",
-	"123-456-7890",
-)
+const makeName = (value: string): Name => {
+  if (value === null || value === undefined) {
+    throw new ValidationError("Name cannot be null or undefined");
+  }
 
-console.table(newUser)
+  const trimmed = value.trim();
+
+  if (trimmed.length === 0) {
+    throw new ValidationError("Name cannot be empty");
+  }
+
+  if (trimmed.length < 2 || trimmed.length > 50) {
+    throw new ValidationError("Name must be between 2 and 50 characters");
+  }
+
+  const nameRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/
+  if (!nameRegex.test(trimmed)) {
+    throw new ValidationError('Name can only contain letters, spaces, hyphens, and apostrophes');
+  }
+
+  return trimmed as Name;
+};
+
+const makeEmail = (value: string): Email => {
+  if (value === null || value === undefined) {
+    throw new ValidationError("Email cannot be null or undefined");
+  }
+
+  const trimmed = value.trim().toLowerCase();
+
+  if (trimmed.length === 0) {
+    throw new ValidationError("Email cannot be empty");
+  }
+
+  const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+  if(!emailRegex.test(trimmed)) {
+    throw new ValidationError("Email must be in valid format (user@domain.com)");
+  }
+
+  if (trimmed.length > 254) {
+    throw new ValidationError("Email cannot exceed 254 characters");
+  }
+
+  return trimmed as Email;
+};
+
+const makePhone = (value: string): Phone => {
+  if (value === null || value === undefined) {
+    throw new ValidationError("Phone cannot be null or undefined");
+  }
+
+  const cleaned = value.replace(/[\s\-().]/g, '');
+
+  if(!/^\d+$/.test(cleaned)) {
+    throw new ValidationError('Phone must contain only digits')
+  }
+
+  if (cleaned.length !== 10) {
+    throw new ValidationError('Phone must be exactly 10 digits')
+  }
+
+  const prefix = cleaned.substring(0, 2);
+  const validPrefixes = ['01', '02', '03', '04', '05', '06', '07', '08', '09'];
+
+  if(!validPrefixes.includes(prefix)) {
+    throw new ValidationError('Phone must start with valid French prefix (01-09)');
+  }
+
+  const formatted = cleaned.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+
+  return formatted as Phone;
+};
+
+const makePassword = (value: string): Password => {
+  if (value === null || value === undefined) {
+    throw new ValidationError("Password cannot be null or undefined");
+  }
+
+  if (value.length === 0) {
+    throw new ValidationError("Password cannot be empty");
+  }
+
+  if (value.length < 8) {
+    throw new ValidationError('Password must be at least 8 characters');
+  }
+
+  if (value.length > 128) {
+    throw new ValidationError('Password cannot exceed 128 characters');
+  }
+
+  if (!/[a-zA-Z]/.test(value)) {
+    throw new ValidationError('Password must contain at least one letter');
+  }
+
+  if (!/\d/.test(value)) {
+    throw new ValidationError('Password must contain at least one number')
+  }
+  
+  return value as Password;
+};
+
+const registerUser = (
+	nameStr: string,
+	emailStr: string,
+	phoneStr: string,
+	passwordStr: string
+): User => {
+	const name = makeName(nameStr)
+	const email = makeEmail(emailStr)
+	const phone = makePhone(phoneStr)
+	const password = makePassword(passwordStr)
+
+	return createUser(name, email, phone, password)
+}
+
+try {
+	const newUser = registerUser(
+		'Alice Johnson',
+		'alice@example.com',
+		'0612345678',
+		'secret123'
+	)
+	console.table(newUser)
+}
+catch (error) {
+	if (error instanceof ValidationError) {
+		console.error('Validation Error:', error.message)
+	}
+}
+
 /*
 /*
 /*
