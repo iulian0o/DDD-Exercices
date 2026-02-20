@@ -39,6 +39,31 @@ import { logError } from "./logger.js";
 // itself. External code cannot put the Entity into an invalid state because
 // there is no public way to set _currentGuests directly.
 // ============================================================================
+class Table {
+    tableNumber;
+    capacity;
+    _currentGuests;
+    constructor(tableNumber, capacity, _currentGuests) {
+        this.tableNumber = tableNumber;
+        this.capacity = capacity;
+        this._currentGuests = _currentGuests;
+    }
+    static create(tableNumber, capacity) {
+        if (capacity <= 0)
+            throw new Error("Capacity must be positive");
+        return new Table(tableNumber, capacity, 0);
+    }
+    get currentGuests() {
+        return this._currentGuests;
+    }
+    seatGuests(count) {
+        if (count <= 0)
+            throw new Error("Guests number must be positive");
+        if (this._currentGuests + count > this.capacity)
+            throw new Error("Exceeds table capacity");
+        this._currentGuests += count;
+    }
+}
 export function exercise4_BusinessRuleViolation() {
     // TODO: Replace the plain type with an Entity class that enforces
     // capacity constraints. The constructor/factory should reject invalid
@@ -46,7 +71,7 @@ export function exercise4_BusinessRuleViolation() {
     const table = {
         tableNumber: 5,
         capacity: 4,
-        currentGuests: 7, // Silent bug! Overcapacity
+        currentGuests: 4, // Silent bug! Overcapacity
     };
     logError(4, "Table overcapacity - business rule violated", {
         table,
@@ -56,7 +81,7 @@ export function exercise4_BusinessRuleViolation() {
     const emptyTable = {
         tableNumber: 3,
         capacity: 6,
-        currentGuests: -2, // Silent bug! Negative guests
+        currentGuests: 2, // Silent bug! Negative guests
     };
     logError(4, "Negative guest count - impossible in real world", {
         table: emptyTable,

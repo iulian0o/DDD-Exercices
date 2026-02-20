@@ -1,4 +1,4 @@
-import { logError } from "./logger.js"
+import { logError } from "./logger.js";
 
 //============================================================================
 // EXERCISE 3: String Confusion - Email vs Phone vs Name
@@ -47,7 +47,7 @@ function createEmail(s: string): Email {
 
 function createPhone(s: string): Phone {
   if (!/^\d[d\-]{6,}$/.test(s)) throw new Error("Invalid phone number");
-  
+
   return s as Phone;
 }
 
@@ -58,36 +58,36 @@ function createCustomerName(s: string): CustomerName {
 }
 
 export function exercise3_StringConfusion() {
-	type Customer = {
-		name: CustomerName,
-		email: Email,
-		phone: Phone,
-	}
+  type Customer = {
+    name: CustomerName;
+    email: Email;
+    phone: Phone;
+  };
 
-	// TypeScript sees all strings as the same!
-	const customer: Customer = {
+  // TypeScript sees all strings as the same!
+  const customer: Customer = {
     name: createCustomerName("John Doe"), // Silent bug! Email in name field
-		email: createEmail("john@example.com"), // Silent bug! Name in email field
-		phone: createPhone("555-PIZZA"), // Silent bug! Letters in phone field
-	}
+    email: createEmail("john@example.com"), // Silent bug! Name in email field
+    phone: createPhone("555-PIZZA"), // Silent bug! Letters in phone field
+  };
 
-	// TODO: Create separate branded types (Email, Phone, CustomerName) so
-	// that swapping values between fields becomes a compile-time error.
+  // TODO: Create separate branded types (Email, Phone, CustomerName) so
+  // that swapping values between fields becomes a compile-time error.
 
-	logError(3, "Fields mixed up - all are strings, TypeScript doesn't care", {
-		customer,
-		issue: "Email, phone, and name are all 'string' - no semantic distinction!",
-	})
+  logError(3, "Fields mixed up - all are strings, TypeScript doesn't care", {
+    customer,
+    issue: "Email, phone, and name are all 'string' - no semantic distinction!",
+  });
 
-	// Even worse - empty strings pass validation
-	const emptyCustomer: Customer = {
-		name: createCustomerName(""),
-		email: createEmail(""),
-		phone: createPhone(""),
-	}
+  // Even worse - empty strings pass validation
+  const emptyCustomer: Customer = {
+    name: createCustomerName(""),
+    email: createEmail(""),
+    phone: createPhone(""),
+  };
 
-	logError(3, "Empty strings accepted everywhere", {
-		customer: emptyCustomer,
-		issue: "Required fields should not be empty!",
-	})
+  logError(3, "Empty strings accepted everywhere", {
+    customer: emptyCustomer,
+    issue: "Required fields should not be empty!",
+  });
 }

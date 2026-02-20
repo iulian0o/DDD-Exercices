@@ -1,4 +1,4 @@
-import { logError } from "./logger.js"
+import { logError } from "./logger.js";
 
 //============================================================================
 // EXERCISE 1: Primitive Obsession - The Price Problem
@@ -23,7 +23,7 @@ import { logError } from "./logger.js"
 // so every price in the system is guaranteed valid by construction.
 // ============================================================================
 
-type Price = number & { readonly __brand: unique symbol};
+type Price = number & { readonly __brand: unique symbol };
 
 function createPrice(amount: number): Price {
   if (amount < 0) throw new Error("Price can't be negative");
@@ -33,29 +33,29 @@ function createPrice(amount: number): Price {
 }
 
 export function exercise1_PrimitivePrice() {
-	// Without domain types, price is just a number
-	type MenuItem = {
-		name: string
-		price: Price // Could be negative! Could be a huge number!
-		quantity: number
-	}
+  // Without domain types, price is just a number
+  type MenuItem = {
+    name: string;
+    price: Price; // Could be negative! Could be a huge number!
+    quantity: number;
+  };
 
-	const orderItem: MenuItem = {
-		name: "Burger",
-		price: createPrice(50), // Silent bug! Negative price
-		quantity: 1,
-	}
+  const orderItem: MenuItem = {
+    name: "Burger",
+    price: createPrice(50), // Silent bug! Negative price
+    quantity: 1,
+  };
 
-	// TODO: Replace `number` with a Price branded type.
-	// The goal is to make this line a compile-time error:
-	//   price: -50   // <-- should NOT be assignable to Price
-	// Instead, force callers through createPrice(-50), which throws at runtime.
+  // TODO: Replace `number` with a Price branded type.
+  // The goal is to make this line a compile-time error:
+  //   price: -50   // <-- should NOT be assignable to Price
+  // Instead, force callers through createPrice(-50), which throws at runtime.
 
-	const total = orderItem.price * orderItem.quantity
-	logError(1, "Negative price accepted without complaint", {
-		item: orderItem.name,
-		price: orderItem.price,
-		calculatedTotal: total,
-		issue: "Price should never be negative!",
-	})
+  const total = orderItem.price * orderItem.quantity;
+  logError(1, "Negative price accepted without complaint", {
+    item: orderItem.name,
+    price: orderItem.price,
+    calculatedTotal: total,
+    issue: "Price should never be negative!",
+  });
 }
